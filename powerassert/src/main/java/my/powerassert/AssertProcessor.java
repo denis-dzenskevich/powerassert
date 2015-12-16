@@ -5,6 +5,7 @@ import com.sun.source.util.*;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.code.Types;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
+import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.List;
@@ -41,13 +42,13 @@ public class AssertProcessor extends AbstractProcessor {
                 new TreePathScanner<Object, Object>() {
                     @Override
                     public Object visitAssert(AssertTree assertTree, Object o) {
-                        System.out.println(assertTree);
                         Name variable = names.fromString("_powerassert");
                         JCExpression powerAssertClass = fullyQualifiedName(factory, names, "my", "powerassert", "PowerAssert");
+                        JCExpression message = assertTree.getDetail() != null ? (JCExpression) assertTree.getDetail() : factory.Literal(TypeTag.CLASS, "assertion failed");
                         JCExpression instantiation = factory.NewClass(null /* encl */
                                 , null /* typeargs */
                                 , powerAssertClass /* clazz */
-                                , List.of((JCExpression) assertTree.getDetail(), factory.Literal(TypeTag.CLASS, assertTree.getCondition().toString())) /* args */
+                                , List.of(message, factory.Literal(TypeTag.CLASS, assertTree.getCondition().toString())) /* args */
                                 , null /* def */);
                         JCStatement declaration = factory.VarDef(factory.Modifiers(0, List.<JCAnnotation>nil()) /* mods */
                                 , variable /* name */
@@ -55,11 +56,12 @@ public class AssertProcessor extends AbstractProcessor {
                                 , instantiation /* init */);
                         ArrayList<JCStatement> statements = new ArrayList<JCStatement>();
                         statements.add(declaration);
+                        int basePosition = ((JCTree) assertTree.getCondition()).getStartPosition();
                         for (ExpressionPart part : splitExpression(assertTree.getCondition())) {
                             JCMethodInvocation invocation = factory.Apply(List.<JCExpression>nil() /* typeargs */
                                     , factory.Select(factory.Ident(variable), names.fromString("part")) /* meth */
                                     , List.of(factory.Literal(TypeTag.INT, part.level) /* args: level */
-                                            , factory.Literal(TypeTag.INT, part.position/*minus base*/) /* args: position */
+                                            , factory.Literal(TypeTag.INT, part.position - basePosition) /* args: position */
                                             , (JCExpression) part.expression /* args: value */
                                             ) /* args */);
                             JCVariableDecl catchVariable = factory.VarDef(factory.Modifiers(0, List.<JCAnnotation>nil()) /* mods */
@@ -88,16 +90,6 @@ public class AssertProcessor extends AbstractProcessor {
                 }.scan(trees.getPath(element), null);
                 int count = replacements.execute();
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, count + " replacements done");
-/*                for (StatementTree statement : method.getBody().getStatements()) {
-                    if (statement instanceof AssertTree) {
-                        AssertTree assertTree = (AssertTree) statement;
-                        System.out.println(assertTree);
-//                        int start = ((JCTree) assertTree).pos;
-//                        walkExpression(0, start, assertTree.getCondition());
-//                        JCTree.JCAssert jcAssert = (JCTree.JCAssert) assertTree;
-//                        jcAssert.cond = newInstance(constructor(JCTree.JCLiteral.class, TypeTag.class, Object.class), TypeTag.BOOLEAN, 0);
-                    }
-                }*/
             }
         }
         return false;

@@ -2,7 +2,10 @@ package my.powerassert;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.*;
 
 @Assert
 public class PowerAssertTest {
@@ -14,15 +17,31 @@ public class PowerAssertTest {
         } catch (AssertionError e) {
             return;
         }
-        fail();
+        fail("not thrown");
     }
 
-/*    @Test
-    public void assertion_message_is_optional() {
+    @Test
+    public void message_is_optional() {
         try {
             assert false;
         } catch (AssertionError e) {
-            return;
+            assertThat(e.getMessage()).startsWith("assertion failed:\n");
         }
+    }
+
+    @Test
+    public void message_is_used() {
+        try {
+            assert false : "message";
+        } catch (AssertionError e) {
+            assertThat(e.getMessage()).startsWith("message:\n");
+        }
+    }
+/*
+    @Test
+    public void testz() {
+        final List<String> list = new ArrayList<String>();
+        final int value = 110, size = -50000;
+        assert list.isEmpty() && value < Math.max(size, 100) || false : "actually working assertion!";
     }*/
 }

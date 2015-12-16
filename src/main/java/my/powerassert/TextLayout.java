@@ -1,84 +1,82 @@
 package my.powerassert;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TextLayout {
 
     private final int border;
-    private final List<List<Block>> lines = new ArrayList<>();
-    private List<Block> currentLine = nextLine();
+    private final int length;
+    private final List<char[]> lines = new ArrayList<char[]>();
+    private char[] currentLine;
 
-    public TextLayout(int border) {
+    public TextLayout(int border, int length) {
         this.border = border;
+        this.length = length;
+        nextLine();
+        nextLine();
     }
 
-    public void put(int position, String text) {
-        Block block = new Block();
-        block.left = position;
-        block.text = text;
-        if (canPut(block)) {
-            currentLine.add(block);
+    public boolean put(int position, String text) {
+        if (canPut(position, text.length())) {
+            doPut(position, text);
+            return true;
         } else {
             nextLine();
             put(position, text);
+            return false;
         }
     }
 
-    private boolean canPut(Block block) {
-        for (Block existingBlock : currentLine) {
-            if (intersects(block, existingBlock)) {
+    private boolean canPut(int position, int length) {
+        if (position > 0 && currentLine[position - 1] != ' ') {
+            return false;
+        }
+        for (int i = position; i < Math.min(this.length, position + length); i++) {
+            if (currentLine[i] != ' ') {
                 return false;
             }
         }
         return true;
     }
 
-    private boolean intersects(Block a, Block b) {
-        if (a.left <= b.left && b.left < a.right()) {
-            return true;
+    private void doPut(int position, String text) {
+        if (position + text.length() > this.length) {
+            lines.remove(lines.size() - 1);
+            currentLine = Arrays.copyOf(currentLine, position + text.length());
+            lines.add(currentLine);
         }
-        if (b.left <= a.left && a.left < b.right()) {
-            return true;
+        System.arraycopy(text.toCharArray(), 0, currentLine, position, text.length());
+        for (int i = 0; i < lines.size() - 1; i++) {
+            char[] line = lines.get(i);
+            if (line[position] == ' ') {
+                line[position] = '|';
+            }
         }
-        return false;
     }
 
-    public List<Block> nextLine() {
-        currentLine = new ArrayList<>();
+    public char[] nextLine() {
+        currentLine = new char[length];
+        Arrays.fill(currentLine, ' ');
         lines.add(currentLine);
         return currentLine;
     }
 
-    public String build() {
+    @Override
+    public String toString() {
         StringBuilder str = new StringBuilder();
-        spaces(str, border);
-        for (List<Block> line : lines) {
-            int length = 0;
-            for (Block block : line) {
-                spaces(str, block.left - length);
-                str.append(block.text);
-                length = block.right();
-            }
-            str.append('\n');
+        for (char[] line : lines) {
             spaces(str, border);
+            str.append(line).append('\n');
         }
+        str.deleteCharAt(str.length() - 1);
         return str.toString();
     }
 
     private void spaces(StringBuilder str, int count) {
         for (int i = 0; i < count; i++) {
             str.append(' ');
-        }
-    }
-
-    private static class Block {
-
-        int left;
-        String text;
-
-        int right() {
-            return left + text.length();
         }
     }
 }

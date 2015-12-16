@@ -39,13 +39,15 @@ public class PowerAssert {
             }
         });
         TextLayout layout = new TextLayout(4, expression.length());
-        int lastLevel = parts.get(0).level;
-        for (Part part : parts) {
-            if (lastLevel != part.level) {
-                lastLevel = part.level;
-                layout.nextLine();
+        if (!parts.isEmpty()) {
+            int lastLevel = parts.get(0).level;
+            for (Part part : parts) {
+                if (lastLevel != part.level) {
+                    lastLevel = part.level;
+                    layout.nextLine();
+                }
+                layout.put(part.position, part.value);
             }
-            layout.put(part.position, part.value);
         }
         return str.append(layout).toString();
     }

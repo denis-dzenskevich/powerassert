@@ -37,6 +37,12 @@ public class PowerAssertTest {
             assertThat(e.getMessage()).startsWith("message:\n");
         }
     }
+
+/*    @Test
+    public void stack_trace_must_point_to_assert_line() {
+
+    }*/
+
 /*
     @Test
     public void testz() {

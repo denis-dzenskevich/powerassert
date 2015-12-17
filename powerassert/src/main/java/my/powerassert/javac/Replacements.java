@@ -15,11 +15,10 @@ public class Replacements {
         items.add(new Item(parent, object, replacement));
     }
 
-    public int execute() {
+    public void execute() {
         for (Item item : items) {
             execute(item);
         }
-        return items.size();
     }
 
     private void execute(Item item) {

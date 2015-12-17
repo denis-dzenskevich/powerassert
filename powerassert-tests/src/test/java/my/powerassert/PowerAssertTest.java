@@ -1,5 +1,6 @@
 package my.powerassert;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -38,16 +39,12 @@ public class PowerAssertTest {
         }
     }
 
-/*    @Test
-    public void stack_trace_must_point_to_assert_line() {
-
-    }*/
-
-/*
     @Test
+//    @Ignore
     public void testz() {
         final List<String> list = new ArrayList<String>();
         final int value = 110, size = -50000;
-        assert list.isEmpty() && value < Math.max(size, 100) || false : "actually working assertion!";
-    }*/
+//        assert list.isEmpty() && value < Math.max(size, 100) || false : "actually working assertion!";
+//        assert false && true/* Math.max(size, 100) || false*/ : "actually working assertion!";
+    }
 }

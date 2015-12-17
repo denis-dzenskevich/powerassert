@@ -42,6 +42,7 @@ public class AssertProcessor extends AbstractProcessor {
                 new TreePathScanner<Object, Object>() {
                     @Override
                     public Object visitAssert(AssertTree assertTree, Object o) {
+                        int basePosition = ((JCTree) assertTree.getCondition()).getStartPosition();
                         Name variable = names.fromString("_powerassert");
                         JCExpression powerAssertClass = fullyQualifiedName(factory, names, "my", "powerassert", "PowerAssert");
                         JCExpression message = assertTree.getDetail() != null ? (JCExpression) assertTree.getDetail() : factory.Literal(TypeTag.CLASS, "assertion failed");
@@ -50,13 +51,13 @@ public class AssertProcessor extends AbstractProcessor {
                                 , powerAssertClass /* clazz */
                                 , List.of(message, factory.Literal(TypeTag.CLASS, assertTree.getCondition().toString())) /* args */
                                 , null /* def */);
-                        JCStatement declaration = factory.VarDef(factory.Modifiers(0, List.<JCAnnotation>nil()) /* mods */
+                        JCVariableDecl declaration = factory.VarDef(factory.Modifiers(0, List.<JCAnnotation>nil()) /* mods */
                                 , variable /* name */
                                 , powerAssertClass /* vartype */
                                 , instantiation /* init */);
+                        declaration.setPos(basePosition);
                         ArrayList<JCStatement> statements = new ArrayList<JCStatement>();
                         statements.add(declaration);
-                        int basePosition = ((JCTree) assertTree.getCondition()).getStartPosition();
                         for (ExpressionPart part : splitExpression(assertTree.getCondition())) {
                             JCMethodInvocation invocation = factory.Apply(List.<JCExpression>nil() /* typeargs */
                                     , factory.Select(factory.Ident(variable), names.fromString("part")) /* meth */
@@ -77,6 +78,7 @@ public class AssertProcessor extends AbstractProcessor {
                         JCMethodInvocation buildInvocation = factory.Apply(List.<JCExpression>nil() /* typeargs */
                                 , factory.Select(factory.Ident(variable), names.fromString("build")) /* meth */
                                 , List.<JCExpression>nil() /* args */);
+                        buildInvocation.setPos(basePosition);
                         JCThrow throwStatement = factory.Throw(factory.NewClass(null /* encl */
                                 , null /* typeargs */
                                 , fullyQualifiedName(factory, names, "java", "lang", "AssertionError") /* clazz */
@@ -88,11 +90,10 @@ public class AssertProcessor extends AbstractProcessor {
                         return super.visitAssert(assertTree, o);
                     }
                 }.scan(trees.getPath(element), null);
-                int count = replacements.execute();
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, count + " replacements done");
             }
         }
-        return false;
+        replacements.execute();
+        return true;
     }
 
     private JCExpression fullyQualifiedName(Factory factory, Names names, String firstPart, String... remainingParts) {

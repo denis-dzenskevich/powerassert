@@ -38,7 +38,6 @@ public class AssertProcessor extends AbstractProcessor {
         final Replacements replacements = new Replacements();
         for (TypeElement annotation : annotations) {
             for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
-                ((MethodTree) ((ClassTree) trees.getTree(element)).getMembers().get(1)).getBody();
                 new TreePathScanner<Object, Object>() {
                     @Override
                     public Object visitAssert(AssertTree assertTree, Object o) {
@@ -166,8 +165,7 @@ public class AssertProcessor extends AbstractProcessor {
             }
             @Override
             public Object visitBinary(BinaryTree binaryTree, Integer level) {
-                parts.add(new ExpressionPart(binaryTree, level, ((JCExpression) binaryTree).getStartPosition()));
-                return super.visitBinary(binaryTree, level);
+                return add(binaryTree, level, super.visitBinary(binaryTree, level));
             }
             @Override
             public Object visitInstanceOf(InstanceOfTree instanceOfTree, Integer level) {
@@ -179,19 +177,23 @@ public class AssertProcessor extends AbstractProcessor {
             }
             @Override
             public Object visitMemberSelect(MemberSelectTree memberSelectTree, Integer level) {
-                return super.visitMemberSelect(memberSelectTree, level); // ???
+                return add(memberSelectTree, level, super.visitMemberSelect(memberSelectTree, level));
             }
             @Override
             public Object visitMemberReference(MemberReferenceTree memberReferenceTree, Integer level) {
-                return super.visitMemberReference(memberReferenceTree, level); // ???
+                return add(memberReferenceTree, level, super.visitMemberReference(memberReferenceTree, level));
             }
             @Override
             public Object visitIdentifier(IdentifierTree identifierTree, Integer level) {
-                return super.visitIdentifier(identifierTree, level); // ???
+                return add(identifierTree, level, super.visitIdentifier(identifierTree, level));
             }
             @Override
             public Object visitOther(Tree tree, Integer level) {
                 return super.visitOther(tree, level); // ???
+            }
+            private Object add(Tree tree, Integer level, Object result) {
+                parts.add(new ExpressionPart(tree, level, ((JCExpression) tree).getPreferredPosition()));
+                return result;
             }
         }, 0);
         return parts;

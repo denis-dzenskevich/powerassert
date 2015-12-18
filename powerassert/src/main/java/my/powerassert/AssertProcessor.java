@@ -69,6 +69,7 @@ public class AssertProcessor extends AbstractProcessor {
                                     , names.fromString("_powerassert_catch") /* name */
                                     , fullyQualifiedName(factory, names, "java", "lang", "Throwable") /* vartype */
                                     , null /* init */);
+                            catchVariable.setPos(basePosition);
                             JCCatch catchBlock = factory.Catch(catchVariable /* param */
                                     , factory.Block(0, List.<JCStatement>nil()));
                             statements.add(factory.Try(factory.Block(0, List.<JCStatement>of(factory.Exec(invocation))) /* body */

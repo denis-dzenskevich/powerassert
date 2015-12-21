@@ -12,12 +12,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assert.assertEquals;
 
-@Assert
+//@Assert
 public class PowerAssertTest {
 
     private static final Pattern DETAIL_PATTERN = Pattern.compile("^    (.+?) *");
 
     private boolean field;
+    private Obj obj = new Obj();
 
     @Test
     public void throws_expection_if_condition_failed() {
@@ -93,15 +94,54 @@ public class PowerAssertTest {
     @Test
     public void explain_field_access() {
         try {
-            Obj obj = new Obj();
             assert obj.booleanField;
         } catch (AssertionError e) {
             assertEquals("obj.booleanField\n"
-                       + "|  |\n"
-                       + "Obj|\n"
-                       + "   false", stripMessage(e.getMessage()));
+                       + "|   |\n"
+                       + "Obj |\n"
+                       + "    false", stripMessage(e.getMessage()));
         }
     }
+
+    @Test
+    public void explain_field_access_spaced() {
+        try {
+            assert obj . booleanField;
+        } catch (AssertionError e) {
+            assertEquals("obj . booleanField\n"
+                       + "|     |\n"
+                       + "Obj   |\n"
+                       + "      false", stripMessage(e.getMessage()));
+        }
+    }
+
+    @Test
+    public void explain_method_call() {
+        try {
+            assert obj.method();
+        } catch (AssertionError e) {
+            assertEquals("obj.method()\n"
+                       + "|   |\n"
+                       + "Obj |\n"
+                       + "    false", stripMessage(e.getMessage()));
+        }
+    }
+
+    @Test
+    public void explain_method_call_spaced() {
+        try {
+            assert obj . method ( );
+        } catch (AssertionError e) {
+            assertEquals("obj . method ( )\n"
+                       + "|     |\n"
+                       + "Obj   |\n"
+                       + "      false", stripMessage(e.getMessage()));
+        }
+    }
+
+    // TODO annotation on package
+    // TODO try no annotations
+    // TODO test nested class
 
     @Test
 //    @Ignore
@@ -131,6 +171,10 @@ public class PowerAssertTest {
     private static class Obj {
 
         private boolean booleanField = false;
+
+        public boolean method() {
+            return false;
+        }
 
         @Override
         public String toString() {

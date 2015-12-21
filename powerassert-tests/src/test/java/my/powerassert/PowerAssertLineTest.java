@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-@Assert
+//@Assert
 public class PowerAssertLineTest {
 
     @Test

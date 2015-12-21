@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-//@Assert
 public class PowerAssertLineTest {
 
     @Test
@@ -15,7 +14,7 @@ public class PowerAssertLineTest {
             StackTraceElement ste = e.getStackTrace()[0];
             assertThat(ste.getClassName()).isEqualTo("my.powerassert.PowerAssertLineTest");
             assertThat(ste.getMethodName()).isEqualTo("stack_trace_must_point_to_assert_line");
-            assertThat(ste.getLineNumber()).isEqualTo(13);
+            assertThat(ste.getLineNumber()).isEqualTo(12);
             return;
         }
         fail("not thrown");

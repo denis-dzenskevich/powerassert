@@ -3,7 +3,6 @@ import my.powerassert.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-//@Assert
 public class Sample {
 
     public static void main(String[] args) {

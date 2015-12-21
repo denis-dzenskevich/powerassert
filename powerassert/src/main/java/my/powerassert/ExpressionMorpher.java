@@ -1,9 +1,11 @@
 package my.powerassert;
 
 import com.sun.source.tree.*;
-import com.sun.source.util.TreeScanner;
+import com.sun.source.util.TreePath;
+import com.sun.source.util.TreePathScanner;
 import com.sun.tools.javac.tree.EndPosTable;
 import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.tree.TreeInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,92 +13,100 @@ import java.util.List;
 public class ExpressionMorpher {
 
     private final EndPosTable endPositions;
+    private final JCTree.JCCompilationUnit compilationUnit;
 
-    public ExpressionMorpher(EndPosTable endPositions) {
+    public ExpressionMorpher(EndPosTable endPositions, JCTree.JCCompilationUnit compilationUnit) {
         this.endPositions = endPositions;
+        this.compilationUnit = compilationUnit;
     }
 
     public List<ExpressionPart> splitExpression(Tree expression) {
         final List<ExpressionPart> parts = new ArrayList<ExpressionPart>();
-        expression.accept(new TreeScanner<Object, VisitContext>() {
+        new TreePathScanner<Object, Integer>() {
             @Override
-            public Object visitConditionalExpression(ConditionalExpressionTree tree, VisitContext context) {
-                return super.visitConditionalExpression(tree, context);
+            public Object visitConditionalExpression(ConditionalExpressionTree tree, Integer level) {
+                return super.visitConditionalExpression(tree, level);
             }
             @Override
-            public Object visitExpressionStatement(ExpressionStatementTree tree, VisitContext context) {
-                return super.visitExpressionStatement(tree, context); // ???
+            public Object visitExpressionStatement(ExpressionStatementTree tree, Integer level) {
+                return super.visitExpressionStatement(tree, level); // ???
             }
             @Override
-            public Object visitMethodInvocation(MethodInvocationTree tree, VisitContext context) {
+            public Object visitMethodInvocation(MethodInvocationTree tree, Integer level) {
                 MemberSelectTree memberSelect = (MemberSelectTree) tree.getMethodSelect();
-                return add(tree, endPos(memberSelect) - memberSelect.getIdentifier().length(), context, super.visitMethodInvocation(tree, context.skipNextMemberSelect()));
+                return add(tree, endPos(memberSelect) - memberSelect.getIdentifier().length(), level, super.visitMethodInvocation(tree, level + 1));
             }
             @Override
-            public Object visitNewClass(NewClassTree tree, VisitContext context) {
-                return super.visitNewClass(tree, context);
+            public Object visitNewClass(NewClassTree tree, Integer level) {
+                return super.visitNewClass(tree, level);
             }
             @Override
-            public Object visitNewArray(NewArrayTree tree, VisitContext context) {
-                return super.visitNewArray(tree, context);
+            public Object visitNewArray(NewArrayTree tree, Integer level) {
+                return super.visitNewArray(tree, level);
             }
             @Override
-            public Object visitLambdaExpression(LambdaExpressionTree tree, VisitContext context) {
-                return super.visitLambdaExpression(tree, context);
+            public Object visitLambdaExpression(LambdaExpressionTree tree, Integer level) {
+                return super.visitLambdaExpression(tree, level);
             }
             @Override
-            public Object visitParenthesized(ParenthesizedTree tree, VisitContext context) {
-                return super.visitParenthesized(tree, context); // ???
+            public Object visitParenthesized(ParenthesizedTree tree, Integer level) {
+                return super.visitParenthesized(tree, level); // ???
             }
             @Override
-            public Object visitAssignment(AssignmentTree tree, VisitContext context) {
-                return super.visitAssignment(tree, context);
+            public Object visitAssignment(AssignmentTree tree, Integer level) {
+                return super.visitAssignment(tree, level);
             }
             @Override
-            public Object visitCompoundAssignment(CompoundAssignmentTree tree, VisitContext context) {
-                return super.visitCompoundAssignment(tree, context); // ???
+            public Object visitCompoundAssignment(CompoundAssignmentTree tree, Integer level) {
+                return super.visitCompoundAssignment(tree, level); // ???
             }
             @Override
-            public Object visitUnary(UnaryTree tree, VisitContext context) {
-                return super.visitUnary(tree, context);
+            public Object visitUnary(UnaryTree tree, Integer level) {
+                return super.visitUnary(tree, level);
             }
             @Override
-            public Object visitBinary(BinaryTree tree, VisitContext context) {
-                return add(tree, ((JCTree) tree).getPreferredPosition(), context, super.visitBinary(tree, context.next()));
+            public Object visitBinary(BinaryTree tree, Integer level) {
+                return add(tree, ((JCTree) tree).getPreferredPosition(), level, super.visitBinary(tree, level + 1));
             }
             @Override
-            public Object visitInstanceOf(InstanceOfTree tree, VisitContext context) {
-                return super.visitInstanceOf(tree, context);
+            public Object visitInstanceOf(InstanceOfTree tree, Integer level) {
+                return super.visitInstanceOf(tree, level);
             }
             @Override
-            public Object visitArrayAccess(ArrayAccessTree tree, VisitContext context) {
-                return super.visitArrayAccess(tree, context);
+            public Object visitArrayAccess(ArrayAccessTree tree, Integer level) {
+                return super.visitArrayAccess(tree, level);
             }
             @Override
-            public Object visitMemberSelect(MemberSelectTree tree, VisitContext context) {
-                if (context.skipMemberSelect) {
-                    return super.visitMemberSelect(tree, context);
+            public Object visitMemberSelect(MemberSelectTree tree, Integer level) {
+                if (getCurrentPath().getParentPath().getLeaf().getKind() == Tree.Kind.METHOD_INVOCATION) {
+                    return super.visitMemberSelect(tree, level);
                 } else {
-                    return add(tree, endPos(tree) - tree.getIdentifier().length(), context, super.visitMemberSelect(tree, context.next()));
+                    return add(tree, endPos(tree) - tree.getIdentifier().length(), level, super.visitMemberSelect(tree, level + 1));
+                }
+            }
+            // TODO since 1.7
+//            @Override
+//            public Object visitMemberReference(MemberReferenceTree tree, Integer level) {
+//                return add(tree, ((JCTree) tree).getPreferredPosition(), level, super.visitMemberReference(tree, level.next()));
+//            }
+            @Override
+            public Object visitIdentifier(IdentifierTree tree, Integer level) {
+                Tree parent = getCurrentPath().getParentPath().getLeaf();
+                if (parent.getKind() == Tree.Kind.MEMBER_SELECT && !TreeInfo.nonstaticSelect((JCTree) parent)) {
+                    return super.visitIdentifier(tree, level);
+                } else {
+                    return add(tree, ((JCTree) tree).getPreferredPosition(), level, super.visitIdentifier(tree, level + 1));
                 }
             }
             @Override
-            public Object visitMemberReference(MemberReferenceTree tree, VisitContext context) {
-                return add(tree, ((JCTree) tree).getPreferredPosition(), context, super.visitMemberReference(tree, context.next()));
+            public Object visitOther(Tree tree, Integer level) {
+                return super.visitOther(tree, level); // ???
             }
-            @Override
-            public Object visitIdentifier(IdentifierTree tree, VisitContext context) {
-                return add(tree, ((JCTree) tree).getPreferredPosition(), context, super.visitIdentifier(tree, context.next()));
-            }
-            @Override
-            public Object visitOther(Tree tree, VisitContext context) {
-                return super.visitOther(tree, context); // ???
-            }
-            private Object add(Tree tree, int position, VisitContext context, Object result) {
-                parts.add(new ExpressionPart(tree, context.level, position));
+            private Object add(Tree tree, int position, Integer level, Object result) {
+                parts.add(new ExpressionPart(tree, level, position));
                 return result;
             }
-        }, new VisitContext(0, false));
+        }.scan(TreePath.getPath(compilationUnit, expression), 0);
         return parts;
     }
 
@@ -114,25 +124,6 @@ public class ExpressionMorpher {
             this.expression = expression;
             this.level = level;
             this.position = position;
-        }
-    }
-
-    private static class VisitContext {
-
-        private final int level;
-        private final boolean skipMemberSelect;
-
-        public VisitContext(int level, boolean skipMemberSelect) {
-            this.level = level;
-            this.skipMemberSelect = skipMemberSelect;
-        }
-
-        private VisitContext next() {
-            return new VisitContext(level + 1, false);
-        }
-
-        private VisitContext skipNextMemberSelect() {
-            return new VisitContext(level + 1, true);
         }
     }
 }

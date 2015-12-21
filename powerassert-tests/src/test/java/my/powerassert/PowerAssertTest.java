@@ -12,7 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assert.assertEquals;
 
-//@Assert
 public class PowerAssertTest {
 
     private static final Pattern DETAIL_PATTERN = Pattern.compile("^    (.+?) *");
@@ -53,7 +52,7 @@ public class PowerAssertTest {
         try {
             assert false;
         } catch (AssertionError e) {
-            assertThat(stripMessage(e.getMessage())).isEqualTo("false");
+            assertEquals("false", stripMessage(e));
         }
     }
 
@@ -65,7 +64,7 @@ public class PowerAssertTest {
         } catch (AssertionError e) {
             assertEquals("value\n"
                        + "|\n"
-                       + "false", stripMessage(e.getMessage()));
+                       + "false", stripMessage(e));
         }
     }
 
@@ -76,7 +75,7 @@ public class PowerAssertTest {
         } catch (AssertionError e) {
             assertEquals("field\n"
                        + "|\n"
-                       + "false", stripMessage(e.getMessage()));
+                       + "false", stripMessage(e));
         }
     }
 
@@ -87,7 +86,7 @@ public class PowerAssertTest {
         } catch (AssertionError e) {
             assertEquals("true && false\n"
                        + "     |\n"
-                       + "     false", stripMessage(e.getMessage()));
+                       + "     false", stripMessage(e));
         }
     }
 
@@ -99,7 +98,7 @@ public class PowerAssertTest {
             assertEquals("obj.booleanField\n"
                        + "|   |\n"
                        + "Obj |\n"
-                       + "    false", stripMessage(e.getMessage()));
+                       + "    false", stripMessage(e));
         }
     }
 
@@ -111,7 +110,7 @@ public class PowerAssertTest {
             assertEquals("obj . booleanField\n"
                        + "|     |\n"
                        + "Obj   |\n"
-                       + "      false", stripMessage(e.getMessage()));
+                       + "      false", stripMessage(e));
         }
     }
 
@@ -123,7 +122,7 @@ public class PowerAssertTest {
             assertEquals("obj.method()\n"
                        + "|   |\n"
                        + "Obj |\n"
-                       + "    false", stripMessage(e.getMessage()));
+                       + "    false", stripMessage(e));
         }
     }
 
@@ -135,12 +134,46 @@ public class PowerAssertTest {
             assertEquals("obj . method ( )\n"
                        + "|     |\n"
                        + "Obj   |\n"
-                       + "      false", stripMessage(e.getMessage()));
+                       + "      false", stripMessage(e));
         }
     }
 
-    // TODO annotation on package
-    // TODO try no annotations
+    @Test
+    public void explain_method_arguments() {
+        try {
+            int one = 1;
+            String two = "two";
+            assert obj.method2(one, two);
+        } catch (AssertionError e) {
+            assertEquals("obj.method2(one, two)\n"
+                       + "|   |       |    |\n"
+                       + "Obj |       1    two\n"
+                       + "    false", stripMessage(e));
+        }
+    }
+
+    @Test
+    public void explain_static_field() {
+        try {
+            assert Obj.staticField;
+        } catch (AssertionError e) {
+            assertEquals("Obj.staticField\n"
+                       + "    |\n"
+                       + "    false", stripMessage(e));
+        }
+    }
+
+    @Test
+    public void explain_static_method() {
+        try {
+            assert Obj.staticMethod();
+        } catch (AssertionError e) {
+            assertEquals("Obj.staticMethod()\n"
+                       + "    |\n"
+                       + "    false", stripMessage(e));
+        }
+    }
+
     // TODO test nested class
 
     @Test
@@ -152,8 +185,8 @@ public class PowerAssertTest {
 //        assert false && true/* Math.max(size, 100) || false*/ : "actually working assertion!";
     }
 
-    private static String stripMessage(String message) {
-        List<String> lines = Arrays.asList(message.split("\n"));
+    private static String stripMessage(Throwable exception) {
+        List<String> lines = Arrays.asList(exception.getMessage().split("\n"));
         Preconditions.checkArgument(lines.get(0).equals("assertion failed:"));
         Preconditions.checkArgument(lines.get(1).isEmpty());
         Deque<String> detailLines = new ArrayDeque<String>();
@@ -170,9 +203,19 @@ public class PowerAssertTest {
 
     private static class Obj {
 
+        private static boolean staticField = false;
+
         private boolean booleanField = false;
 
+        public static boolean staticMethod() {
+            return false;
+        }
+
         public boolean method() {
+            return false;
+        }
+
+        public boolean method2(Object a, Object b) {
             return false;
         }
 

@@ -174,8 +174,19 @@ public class PowerAssertTest {
         }
     }
 
-    // TODO test nested class
+    public static class Nested {
 
+        @Test
+        public void nested_class() {
+            try {
+                assert false;
+            } catch (AssertionError e) {
+                assertEquals("false", stripMessage(e));
+            }
+        }
+    }
+
+    // TODO alternative to verbose try-catch in own tests
     // TODO multiline assertion
     //
     // Math.min(

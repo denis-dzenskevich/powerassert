@@ -4,8 +4,11 @@ import com.sun.source.tree.AssertTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
+import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.TypeTag;
+import com.sun.tools.javac.comp.Attr;
+import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.EndPosTable;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.*;
@@ -21,19 +24,24 @@ import java.util.ArrayList;
 
 public class ClassMorpher {
 
+    private final JavacProcessingEnvironment processingEnvironment;
     private final CharSequence source;
     private final EndPosTable endPositions;
     private final Names names;
     private final Factory factory;
     private final ExpressionMorpher expressionMorpher;
+    private final JavacTrees trees;
     private final TreePath path;
+    private boolean attributed;
 
-    public ClassMorpher(Element element, EndPosTable endPositions, Names names, Factory factory, TreePath path, ExpressionMorpher expressionMorpher) {
+    public ClassMorpher(Element element, JavacProcessingEnvironment processingEnvironment, EndPosTable endPositions, Names names, Factory factory, TreePath path, ExpressionMorpher expressionMorpher) {
+        this.processingEnvironment = processingEnvironment;
         this.endPositions = endPositions;
         this.names = names;
         this.factory = factory;
         this.expressionMorpher = expressionMorpher;
         this.path = path;
+        this.trees = JavacTrees.instance(processingEnvironment);
         try {
             source = ((Symbol.ClassSymbol) element).sourcefile.getCharContent(false);
         } catch (IOException e) {
@@ -45,6 +53,7 @@ public class ClassMorpher {
         new TreePathScanner<Object, Object>() {
             @Override
             public Object visitAssert(AssertTree assertTree, Object o) {
+                attributeLazy();
                 int basePosition = ((JCTree) assertTree.getCondition()).getStartPosition();
                 Name variable = names.fromString("_powerassert");
                 JCExpression powerAssertClass = fullyQualifiedName("my", "powerassert", "PowerAssert");
@@ -107,6 +116,12 @@ public class ClassMorpher {
             value = factory.Select(value, names.fromString(remainingPart));
         }
         return value;
+    }
+
+    private void attributeLazy() {
+        if (!attributed) {
+            Attr.instance(processingEnvironment.getContext()).attribExpr((JCTree) path.getLeaf(), trees.getScope(path).getEnv()); // attribute AST tree with symbolic information
+        }
     }
 
     @SuppressWarnings("unchecked")

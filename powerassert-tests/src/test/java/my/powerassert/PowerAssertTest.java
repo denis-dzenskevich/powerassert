@@ -176,6 +176,20 @@ public class PowerAssertTest {
 
     // TODO test nested class
 
+    // TODO multiline assertion
+    //
+    // Math.min(
+    //      |
+    //      1
+    //
+    //     a + b,
+    //     |   |
+    //     2   3
+    //
+    //     c + d)
+    //     |   |
+    //     0   1
+
     @Test
 //    @Ignore
     public void testz() {

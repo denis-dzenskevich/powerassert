@@ -71,6 +71,7 @@
             <groupId>my</groupId>
             <artifactId>powerassert</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

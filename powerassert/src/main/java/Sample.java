@@ -1,5 +1,3 @@
-import my.powerassert.Assert;
-
 import java.util.ArrayList;
 import java.util.List;
 

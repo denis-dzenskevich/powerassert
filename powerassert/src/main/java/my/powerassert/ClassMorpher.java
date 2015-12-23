@@ -1,6 +1,7 @@
 package my.powerassert;
 
 import com.sun.source.tree.AssertTree;
+import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
@@ -22,7 +23,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-public class ClassMorpher {
+class ClassMorpher {
 
     private final JavacProcessingEnvironment processingEnvironment;
     private final CharSequence source;
@@ -34,7 +35,7 @@ public class ClassMorpher {
     private final TreePath path;
     private boolean attributed;
 
-    public ClassMorpher(Element element, JavacProcessingEnvironment processingEnvironment, EndPosTable endPositions, Names names, Factory factory, TreePath path, ExpressionMorpher expressionMorpher) {
+    ClassMorpher(Element element, JavacProcessingEnvironment processingEnvironment, EndPosTable endPositions, Names names, Factory factory, TreePath path, ExpressionMorpher expressionMorpher) {
         this.processingEnvironment = processingEnvironment;
         this.endPositions = endPositions;
         this.names = names;
@@ -49,7 +50,7 @@ public class ClassMorpher {
         }
     }
 
-    public void run(final Replacements replacements) {
+    void run(final Replacements replacements) {
         new TreePathScanner<Object, Object>() {
             @Override
             public Object visitAssert(AssertTree assertTree, Object o) {
@@ -98,7 +99,7 @@ public class ClassMorpher {
                         , List.<JCExpression>of(buildInvocation) /* args */
                         , null /* def */));
                 statements.add(throwStatement);
-                Tree substituation = factory.If(factory.Parens((JCExpression) assertTree.getCondition()), factory.Block(0, List.<JCStatement>nil()), factory.Block(0, toJavacList(JCStatement.class, statements)));
+                StatementTree substituation = factory.If(factory.Parens((JCExpression) assertTree.getCondition()), factory.Block(0, List.<JCStatement>nil()), factory.Block(0, toJavacList(JCStatement.class, statements)));
                 replacements.add(getCurrentPath().getParentPath().getLeaf(), assertTree, substituation);
                 return super.visitAssert(assertTree, o);
             }
@@ -121,6 +122,7 @@ public class ClassMorpher {
     private void attributeLazy() {
         if (!attributed) {
             Attr.instance(processingEnvironment.getContext()).attribExpr((JCTree) path.getLeaf(), trees.getScope(path).getEnv()); // attribute AST tree with symbolic information
+            attributed = true;
         }
     }
 

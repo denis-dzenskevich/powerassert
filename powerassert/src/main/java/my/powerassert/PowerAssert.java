@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 
 public class PowerAssert {
 
     private final String message;
     private final String expression;
-    private List<Part> parts = new ArrayList<Part>();
+    private final List<Part> parts = new ArrayList<Part>();
 
     public PowerAssert(String message, String expression) {
         this.message = message;
@@ -21,7 +20,8 @@ public class PowerAssert {
         Part part = new Part();
         part.level = level;
         part.position = position;
-        part.value = Objects.toString(value);
+        part.value = Objects.toString(value); // TODO <<null>>
+        // TODO <<exception toString>>
         parts.add(part);
     }
 
@@ -54,8 +54,8 @@ public class PowerAssert {
 
     private static class Part {
 
-        int level;
-        int position;
-        String value;
+        private int level;
+        private int position;
+        private String value;
     }
 }

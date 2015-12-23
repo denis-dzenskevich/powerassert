@@ -4,21 +4,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class TextLayout {
+class TextLayout {
 
     private final int border;
     private final int length;
     private final List<char[]> lines = new ArrayList<char[]>();
     private char[] currentLine;
 
-    public TextLayout(int border, int length) {
+    TextLayout(int border, int length) {
         this.border = border;
         this.length = length;
         nextLine();
         nextLine();
     }
 
-    public boolean put(int position, String text) {
+    boolean put(int position, String text) {
         if (canPut(position, text.length())) {
             doPut(position, text);
             return true;
@@ -56,7 +56,7 @@ public class TextLayout {
         }
     }
 
-    public char[] nextLine() {
+    char[] nextLine() {
         currentLine = new char[length];
         Arrays.fill(currentLine, ' ');
         lines.add(currentLine);

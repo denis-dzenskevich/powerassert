@@ -11,7 +11,7 @@ public class Replacements {
 
     private final List<Item> items = new ArrayList<Item>();
 
-    public void add(Tree parent, Tree object, Tree replacement) {
+    public void add(Tree parent, StatementTree object, StatementTree replacement) {
         items.add(new Item(parent, object, replacement));
     }
 
@@ -49,10 +49,10 @@ public class Replacements {
     private static class Item {
 
         private final Tree parent;
-        private final Tree object;
-        private final Tree replacement;
+        private final StatementTree object;
+        private final StatementTree replacement;
 
-        private Item(Tree parent, Tree object, Tree replacement) {
+        private Item(Tree parent, StatementTree object, StatementTree replacement) {
             this.parent = parent;
             this.object = object;
             this.replacement = replacement;

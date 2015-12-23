@@ -10,17 +10,17 @@ import com.sun.tools.javac.tree.TreeInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExpressionMorpher {
+class ExpressionMorpher {
 
     private final EndPosTable endPositions;
     private final JCTree.JCCompilationUnit compilationUnit;
 
-    public ExpressionMorpher(EndPosTable endPositions, JCTree.JCCompilationUnit compilationUnit) {
+    ExpressionMorpher(EndPosTable endPositions, JCTree.JCCompilationUnit compilationUnit) {
         this.endPositions = endPositions;
         this.compilationUnit = compilationUnit;
     }
 
-    public List<ExpressionPart> splitExpression(Tree expression) {
+    List<ExpressionPart> splitExpression(Tree expression) {
         final List<ExpressionPart> parts = new ArrayList<ExpressionPart>();
         new TreePathScanner<Object, Integer>() {
             @Override
@@ -114,13 +114,13 @@ public class ExpressionMorpher {
         return ((JCTree) tree).getEndPosition(endPositions);
     }
 
-    public static class ExpressionPart {
+    static class ExpressionPart {
 
-        public final Tree expression;
-        public final int level;
-        public final int position;
+        final Tree expression;
+        final int level;
+        final int position;
 
-        public ExpressionPart(Tree expression, int level, int position) {
+        ExpressionPart(Tree expression, int level, int position) {
             this.expression = expression;
             this.level = level;
             this.position = position;

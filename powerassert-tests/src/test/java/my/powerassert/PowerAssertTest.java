@@ -175,7 +175,11 @@ public class PowerAssertTest {
             }
             @Override
             public void describeTo(Description description) {
-                description.appendText("JOPA");
+                description.appendText("like\n\n").appendText(expected);
+            }
+            @Override
+            public void describeMismatch(Object item, Description description) {
+                description.appendText("was like\n\n").appendText(normalize(item.toString()));
             }
             private String normalize(String message) {
                 List<String> lines = Arrays.asList(message.split("\n"));
@@ -201,15 +205,15 @@ public class PowerAssertTest {
 
         private boolean booleanField = false;
 
-        public static boolean staticMethod() {
+        static boolean staticMethod() {
             return false;
         }
 
-        public boolean method() {
+        boolean method() {
             return false;
         }
 
-        public boolean method2(Object a, Object b) {
+        boolean method2(Object a, Object b) {
             return false;
         }
 

@@ -140,6 +140,36 @@ public class PowerAssertTest {
         assert Obj.staticMethod();
     }
 
+    @Test
+    public void null_should_be_marked_as_such() {
+        expectm("a != null\n" +
+                "| |\n" +
+                "null\n" +
+                "  false");
+        Object a = null;
+        assert a != null;
+    }
+
+    @Test
+    public void toString_exceptions_should_be_marked_as_such() {
+        expectm("c.field\n" +
+                "| |\n" +
+                "??|\n" +
+                "  false");
+        class C {
+            boolean field = false;
+            @Override
+            public String toString() {
+                throw new IllegalStateException("FAILURE");
+            }
+        }
+        C c = new C();
+        assert c.field;
+    }
+
+    // TODO new Clazz().xx
+    // TODO new Clazz[] {xx}
+
     // TODO multiline assertion
     //
     // Math.min(

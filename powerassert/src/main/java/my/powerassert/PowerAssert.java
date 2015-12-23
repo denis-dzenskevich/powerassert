@@ -20,8 +20,11 @@ public class PowerAssert {
         Part part = new Part();
         part.level = level;
         part.position = position;
-        part.value = Objects.toString(value); // TODO <<null>>
-        // TODO <<exception toString>>
+        try {
+            part.value = Objects.toString(value);
+        } catch (Throwable e) {
+            part.value = "??";
+        }
         parts.add(part);
     }
 

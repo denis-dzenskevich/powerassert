@@ -1,9 +1,9 @@
 package my.powerassert;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 public class PowerAssert {
 
@@ -21,7 +21,7 @@ public class PowerAssert {
         part.level = level;
         part.position = position;
         try {
-            part.value = Objects.toString(value);
+            part.value = String.valueOf(value);
         } catch (Throwable e) {
             part.value = "??";
         }
@@ -31,12 +31,12 @@ public class PowerAssert {
     public String build() {
         StringBuilder str = new StringBuilder(message != null ? message : "assertion failed");
         str.append(":\n\n    ").append(expression).append('\n');
-        parts.sort(new Comparator<Part>() {
+        Collections.sort(parts, new Comparator<Part>() {
             @Override
             public int compare(Part a, Part b) {
-                int result = Integer.compare(b.level, a.level);
+                int result = Integer.valueOf(b.level).compareTo(a.level);
                 if (result == 0) {
-                    result = Integer.compare(a.position, b.position);
+                    result = Integer.valueOf(a.position).compareTo(b.position);
                 }
                 return result;
             }

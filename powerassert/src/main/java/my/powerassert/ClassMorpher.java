@@ -33,7 +33,15 @@ class ClassMorpher {
     private final ExpressionMorpher expressionMorpher;
     private final JavacTrees trees;
     private final TreePath path;
+    private final Name buildMethodName;
+    private final JCExpression assertionErrorClass;
     private boolean attributed;
+
+    private final Name assertVarName;
+    private final JCExpression powerAssertClass;
+    private final Name exprMethodName;
+    private final Name catchVarName;
+    private final JCExpression catchExceptionClass;
 
     ClassMorpher(Element element, JavacProcessingEnvironment processingEnvironment, EndPosTable endPositions, Names names, Factory factory, TreePath path, ExpressionMorpher expressionMorpher) {
         this.processingEnvironment = processingEnvironment;
@@ -48,39 +56,50 @@ class ClassMorpher {
         } catch (IOException e) {
             throw new RuntimeException("Cannot get char content of " + element, e);
         }
+        assertVarName = names.fromString("_powerassert");
+        powerAssertClass = fullyQualifiedName("my.powerassert.PowerAssert");
+        exprMethodName = names.fromString("part");
+        catchVarName = names.fromString("_powerassert_catch");
+        catchExceptionClass = fullyQualifiedName("java.lang.Throwable");
+        buildMethodName = names.fromString("build");
+        assertionErrorClass = fullyQualifiedName("java.lang.AssertionError");
     }
 
+    // TODO explain generated code and set positions to all generated nodes
     void run(final Replacements replacements) {
         new TreePathScanner<Object, Object>() {
             @Override
             public Object visitAssert(AssertTree assertTree, Object o) {
-                attributeLazy();
+                attributeIfNeeded();
+                ArrayList<JCStatement> statements = new ArrayList<JCStatement>();
+                // generated: PowerAssert _powerassert = new PowerAssert(<message>, <expressionString>);
                 int basePosition = ((JCTree) assertTree.getCondition()).getStartPosition();
-                Name variable = names.fromString("_powerassert");
-                JCExpression powerAssertClass = fullyQualifiedName("my", "powerassert", "PowerAssert");
-                JCExpression message = assertTree.getDetail() != null ? (JCExpression) assertTree.getDetail() : factory.Literal(TypeTag.CLASS, "assertion failed");
+                JCExpression message = (JCExpression) assertTree.getDetail();
                 JCExpression instantiation = factory.NewClass(null /* encl */
                         , null /* typeargs */
                         , powerAssertClass /* clazz */
                         , List.of(message, factory.Literal(TypeTag.CLASS, sourceFor(assertTree.getCondition()))) /* args */
                         , null /* def */);
                 JCVariableDecl declaration = factory.VarDef(factory.Modifiers(0, List.<JCAnnotation>nil()) /* mods */
-                        , variable /* name */
+                        , assertVarName /* name */
                         , powerAssertClass /* vartype */
                         , instantiation /* init */);
                 declaration.setPos(basePosition);
-                ArrayList<JCStatement> statements = new ArrayList<JCStatement>();
                 statements.add(declaration);
                 for (ExpressionMorpher.ExpressionPart part : expressionMorpher.splitExpression(assertTree.getCondition())) {
+                    // generated: try {
+                    //                _powerassert.part(<level>, <position>, <expression>);
+                    //            } catch (java.lang.Throwable _powerassert_catch) {
+                    //            }
                     JCMethodInvocation invocation = factory.Apply(List.<JCExpression>nil() /* typeargs */
-                            , factory.Select(factory.Ident(variable), names.fromString("part")) /* meth */
+                            , factory.Select(factory.Ident(assertVarName), exprMethodName) /* meth */
                             , List.of(factory.Literal(TypeTag.INT, part.level) /* args: level */
                                     , factory.Literal(TypeTag.INT, part.position - basePosition) /* args: position */
                                     , (JCExpression) part.expression /* args: value */
                             ) /* args */);
                     JCVariableDecl catchVariable = factory.VarDef(factory.Modifiers(0, List.<JCAnnotation>nil()) /* mods */
-                            , names.fromString("_powerassert_catch") /* name */
-                            , fullyQualifiedName("java", "lang", "Throwable") /* vartype */
+                            , catchVarName /* name */
+                            , catchExceptionClass /* vartype */
                             , null /* init */);
                     catchVariable.setPos(basePosition);
                     JCCatch catchBlock = factory.Catch(catchVariable /* param */
@@ -89,16 +108,22 @@ class ClassMorpher {
                             , List.of(catchBlock) /* catchers */
                             , null /* finalizer */));
                 }
+                // generated: throw new java.lang.AssertionError(_powerassert.build());
                 JCMethodInvocation buildInvocation = factory.Apply(List.<JCExpression>nil() /* typeargs */
-                        , factory.Select(factory.Ident(variable), names.fromString("build")) /* meth */
+                        , factory.Select(factory.Ident(assertVarName), buildMethodName) /* meth */
                         , List.<JCExpression>nil() /* args */);
                 buildInvocation.setPos(basePosition);
                 JCThrow throwStatement = factory.Throw(factory.NewClass(null /* encl */
                         , null /* typeargs */
-                        , fullyQualifiedName("java", "lang", "AssertionError") /* clazz */
+                        , assertionErrorClass /* clazz */
                         , List.<JCExpression>of(buildInvocation) /* args */
                         , null /* def */));
                 statements.add(throwStatement);
+                // generated: if (<expression>) {
+                //                // empty
+                //            } else {
+                //                <statements>
+                //            }
                 StatementTree substituation = factory.If(factory.Parens((JCExpression) assertTree.getCondition()), factory.Block(0, List.<JCStatement>nil()), factory.Block(0, toJavacList(JCStatement.class, statements)));
                 replacements.add(getCurrentPath().getParentPath().getLeaf(), assertTree, substituation);
                 return super.visitAssert(assertTree, o);
@@ -111,15 +136,16 @@ class ClassMorpher {
         return source.subSequence(jctree.getStartPosition(), jctree.getEndPosition(endPositions)).toString();
     }
 
-    private JCExpression fullyQualifiedName(String firstPart, String... remainingParts) {
-        JCExpression value = factory.Ident(names.fromString(firstPart));
-        for (String remainingPart : remainingParts) {
-            value = factory.Select(value, names.fromString(remainingPart));
+    private JCExpression fullyQualifiedName(String dotSeparatedName) {
+        String[] parts = dotSeparatedName.split("\\.");
+        JCExpression value = factory.Ident(names.fromString(parts[0]));
+        for (int i = 1; i < parts.length; i++) {
+            value = factory.Select(value, names.fromString(parts[i]));
         }
         return value;
     }
 
-    private void attributeLazy() {
+    private void attributeIfNeeded() {
         if (!attributed) {
             Attr.instance(processingEnvironment.getContext()).attribExpr((JCTree) path.getLeaf(), trees.getScope(path).getEnv()); // attribute AST tree with symbolic information
             attributed = true;

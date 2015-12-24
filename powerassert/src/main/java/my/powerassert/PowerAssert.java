@@ -12,7 +12,7 @@ public class PowerAssert {
     private final List<Part> parts = new ArrayList<Part>();
 
     public PowerAssert(String message, String expression) {
-        this.message = message;
+        this.message = message != null ? message : "assertion failed";
         this.expression = expression;
     }
 

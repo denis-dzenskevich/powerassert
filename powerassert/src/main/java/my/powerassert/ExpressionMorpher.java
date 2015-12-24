@@ -103,7 +103,7 @@ class ExpressionMorpher {
                 return super.visitOther(tree, level); // ???
             }
             private Object add(Tree tree, int position, Integer level, Object result) {
-                parts.add(new ExpressionPart(tree, level, position));
+                parts.add(new ExpressionPart((JCTree.JCExpression) tree, level, position));
                 return result;
             }
         }.scan(TreePath.getPath(compilationUnit, expression), 0);
@@ -116,11 +116,11 @@ class ExpressionMorpher {
 
     static class ExpressionPart {
 
-        final Tree expression;
+        final JCTree.JCExpression expression;
         final int level;
         final int position;
 
-        ExpressionPart(Tree expression, int level, int position) {
+        ExpressionPart(JCTree.JCExpression expression, int level, int position) {
             this.expression = expression;
             this.level = level;
             this.position = position;

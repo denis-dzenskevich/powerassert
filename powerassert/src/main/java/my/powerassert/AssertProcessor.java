@@ -33,7 +33,8 @@ public class AssertProcessor extends AbstractProcessor {
             TreePath path = trees.getPath(element);
             JCCompilationUnit compilationUnit = (JCCompilationUnit) path.getCompilationUnit();
             ExpressionMorpher expressionMorpher = new ExpressionMorpher(compilationUnit.endPositions, compilationUnit);
-            ClassMorpher classMorpher = new ClassMorpher(element, processingEnvironment, compilationUnit.endPositions, names, factory, path, expressionMorpher);
+            TreeFactory treeFactory = new TreeFactory(factory, names);
+            ClassMorpher classMorpher = new ClassMorpher(element, processingEnvironment, compilationUnit.endPositions, treeFactory, path, expressionMorpher);
             Replacements replacements = new Replacements();
             trees.getElement(path);
             classMorpher.run(replacements);

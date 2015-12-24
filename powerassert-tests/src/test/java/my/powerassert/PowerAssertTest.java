@@ -238,6 +238,33 @@ public class PowerAssertTest {
     }
 
     @Test
+    public void do_not_explain_parens() {
+        expectm("((true) || false) == false\n" +
+                "        |         |\n" +
+                "        true      |\n" +
+                "                  false");
+       assert ((true) || false) == false;
+    }
+
+    @Test
+    public void do_not_explain_assignment() {
+        expectm("var = false\n" +
+                "|\n" +
+                "false");
+        boolean var;
+        assert var = false;
+    }
+
+    @Test
+    public void do_not_explain_complex_assignment() {
+        expectm("var &= false\n" +
+                "|\n" +
+                "false");
+        boolean var = false;
+        assert var &= false;
+    }
+
+    @Test
     public void toString_exceptions_should_be_marked_as_such() {
         expectm("c.field\n" +
                 "| |\n" +

@@ -59,7 +59,7 @@ class ExpressionMorpher {
             }
             @Override
             public Object visitUnary(UnaryTree tree, Integer level) {
-                return super.visitUnary(tree, level);
+                return add(tree, preferredPos(tree), level, super.visitUnary(tree, level + 1));
             }
             @Override
             public Object visitBinary(BinaryTree tree, Integer level) {
@@ -67,11 +67,11 @@ class ExpressionMorpher {
             }
             @Override
             public Object visitInstanceOf(InstanceOfTree tree, Integer level) {
-                return super.visitInstanceOf(tree, level);
+                return add(tree, preferredPos(tree), level, super.visitInstanceOf(tree, level + 1));
             }
             @Override
             public Object visitArrayAccess(ArrayAccessTree tree, Integer level) {
-                return super.visitArrayAccess(tree, level);
+                return add(tree, preferredPos(tree), level, super.visitArrayAccess(tree, level + 1));
             }
             @Override
             public Object visitMemberSelect(MemberSelectTree tree, Integer level) {
@@ -104,11 +104,11 @@ class ExpressionMorpher {
 
     private boolean isSymbolShown(Symbol symbol) {
         switch (symbol.getKind()) {
-            case FIELD:
             case PARAMETER:
             case LOCAL_VARIABLE:
             case EXCEPTION_PARAMETER:
             case RESOURCE_VARIABLE: return true; // TODO RESOURCE_VARIABLE since 1.7
+            case FIELD: return !symbol.name.contentEquals("class"); // all but 'class' special static field on classes
             default: return false;
         }
     }

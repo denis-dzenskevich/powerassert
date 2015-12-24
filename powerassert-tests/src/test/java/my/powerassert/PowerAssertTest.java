@@ -175,13 +175,56 @@ public class PowerAssertTest {
     }
 
     @Test
-    public void do_not_explain_enum_constants() {
+    public void do_not_explain_enum_constant() {
         expectm("value == Enm.YES\n" +
                 "|     |\n" +
                 "NO    |\n" +
                 "      false");
         Enm value = Enm.NO;
         assert value == Enm.YES;
+    }
+
+    @Test
+    public void do_not_explain_class_literal() {
+        expectm("String.class == null\n" +
+                "             |\n" +
+                "             false");
+        assert String.class == null;
+    }
+
+    @Test
+    public void explain_array_access() {
+        expectm("new boolean[] {false} [ 0 ]\n" +
+                "|                     |\n" +
+                "[false]               |\n" +
+                "                      false");
+        assert new boolean[] {false} [ 0 ];
+    }
+
+    @Test
+    public void explain_instanceof() {
+        expectm("obj instanceof String\n" +
+                "|   |\n" +
+                "Obj |\n" +
+                "    false");
+        Object obj = new Obj();
+        assert obj instanceof String;
+    }
+
+    @Test
+    public void explain_boolean_negation() {
+        expectm("! true\n" +
+                "|\n" +
+                "false");
+        assert ! true;
+    }
+
+    @Test
+    public void do_not_explain_integer_negation() {
+        expectm("- 5 == 4\n" +
+                "    |\n" +
+                "    false");
+        assert - 5 == 4;
     }
 
     @Test

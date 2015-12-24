@@ -1,9 +1,6 @@
 package my.powerassert;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class PowerAssert {
 
@@ -12,7 +9,7 @@ public class PowerAssert {
     private final List<Part> parts = new ArrayList<Part>();
 
     public PowerAssert(String message, String expression) {
-        this.message = message != null ? message : "assertion failed";
+        this.message = message;
         this.expression = expression;
     }
 
@@ -21,7 +18,7 @@ public class PowerAssert {
         part.level = level;
         part.position = position;
         try {
-            part.value = String.valueOf(value);
+            part.value = objectToString(value);
         } catch (Throwable e) {
             part.value = "??";
         }
@@ -53,6 +50,31 @@ public class PowerAssert {
             }
         }
         return str.append(layout).toString();
+    }
+
+    private String objectToString(Object value) {
+        if (value != null && value.getClass().isArray()) {
+            if (value instanceof byte[]) {
+                return Arrays.toString((byte[]) value);
+            } else if (value instanceof short[]) {
+                return Arrays.toString((short[]) value);
+            } else if (value instanceof int[]) {
+                return Arrays.toString((int[]) value);
+            } else if (value instanceof long[]) {
+                return Arrays.toString((long[]) value);
+            } else if (value instanceof char[]) {
+                return Arrays.toString((char[]) value);
+            } else if (value instanceof float[]) {
+                return Arrays.toString((float[]) value);
+            } else if (value instanceof double[]) {
+                return Arrays.toString((double[]) value);
+            } else if (value instanceof boolean[]) {
+                return Arrays.toString((boolean[]) value);
+            } else {
+                return Arrays.toString((Object[]) value);
+            }
+        }
+        return String.valueOf(value);
     }
 
     private static class Part {

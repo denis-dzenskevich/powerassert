@@ -141,6 +141,50 @@ public class PowerAssertTest {
     }
 
     @Test
+    public void explain_conditional() {
+        expectm("true ? false : true\n" +
+                "     |\n" +
+                "     false");
+        assert true ? false : true;
+    }
+
+    @Test
+    public void explain_new() {
+        expectm("new Boolean(false)\n" +
+                "|\n" +
+                "false");
+        assert new Boolean(false);
+    }
+
+    @Test
+    public void explain_new_array() {
+        expectm("new int[] {1, 2, 3} == null\n" +
+                "|                   |\n" +
+                "[1, 2, 3]           |\n" +
+                "                    false");
+        assert new int[] {1, 2, 3} == null;
+    }
+
+    @Test
+    public void explain_new_object_array() {
+        expectm("new String[] {\"one\", \"two\"} == null\n" +
+                "|                           |\n" +
+                "[one, two]                  |\n" +
+                "                            false");
+        assert new String[] {"one", "two"} == null;
+    }
+
+    @Test
+    public void do_not_explain_enum_constants() {
+        expectm("value == Enm.YES\n" +
+                "|     |\n" +
+                "NO    |\n" +
+                "      false");
+        Enm value = Enm.NO;
+        assert value == Enm.YES;
+    }
+
+    @Test
     public void null_should_be_marked_as_such() {
         expectm("a != null\n" +
                 "| |\n" +
@@ -166,9 +210,6 @@ public class PowerAssertTest {
         C c = new C();
         assert c.field;
     }
-
-    // TODO new Clazz().xx
-    // TODO new Clazz[] {xx}
 
     // TODO multiline assertion
     //
@@ -251,5 +292,11 @@ public class PowerAssertTest {
         public String toString() {
             return "Obj";
         }
+    }
+
+    private enum Enm {
+
+        YES,
+        NO
     }
 }

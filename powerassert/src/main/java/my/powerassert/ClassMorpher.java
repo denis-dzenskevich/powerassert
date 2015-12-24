@@ -11,7 +11,6 @@ import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.EndPosTable;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.*;
-import com.sun.tools.javac.util.Names;
 import my.powerassert.javac.Replacements;
 
 import javax.lang.model.element.Element;
@@ -56,7 +55,7 @@ class ClassMorpher {
                 t.setPosition(basePosition);
                 // generated: PowerAssert _powerassert = new PowerAssert(<message>, <expressionString>);
                 JCExpression instantiation = t.new_("my.powerassert.PowerAssert"
-                        , jcAssert.getDetail()
+                        , jcAssert.getDetail() != null ? jcAssert.getDetail() : t.literal("assertion failed")
                         , t.literal(sourceFor(jcAssert.getCondition())));
                 JCVariableDecl declaration = t.var("_powerassert", "my.powerassert.PowerAssert", instantiation);
                 statements.add(declaration);

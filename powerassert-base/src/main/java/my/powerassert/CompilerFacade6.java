@@ -5,7 +5,7 @@ import com.sun.source.tree.Tree;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.*;
 
-public class CompilerFacade7 implements CompilerFacade {
+public class CompilerFacade6 implements CompilerFacade {
 
     @Override
     public int getEndPosition(CompilationUnitTree compilationUnit, Tree tree) {

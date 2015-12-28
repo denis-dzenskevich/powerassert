@@ -34,7 +34,6 @@ class ExpressionMorpher extends TreePathScanner<Object, Integer> {
             case LOCAL_VARIABLE:
             case EXCEPTION_PARAMETER: return true;
             case FIELD:
-            case RESOURCE_VARIABLE:
                 return !symbol.name.contentEquals("class"); // all but 'class' special static field on classes
             default:
                 return false;

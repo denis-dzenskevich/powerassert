@@ -7,7 +7,7 @@ public class EnvironmentProvider7 implements EnvironmentProvider {
 
     @Override
     public CompilerFacade createCompilerFacade() {
-        return new CompilerFacade7();
+        return new CompilerFacade6();
     }
 
     @Override
@@ -17,6 +17,6 @@ public class EnvironmentProvider7 implements EnvironmentProvider {
 
     @Override
     public ExpressionMorpher createExpressionMorpher(JCTree.JCCompilationUnit compilationUnit) {
-        return new ExpressionMorpher(compilationUnit, createCompilerFacade());
+        return new ExpressionMorpher7(compilationUnit, createCompilerFacade());
     }
 }

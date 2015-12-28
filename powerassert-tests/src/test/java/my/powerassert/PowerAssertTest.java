@@ -219,6 +219,7 @@ public class PowerAssertTest {
         assert ! true;
     }
 
+    // TODO JDK6: tree.getStartPosition() shows at 5, not at -
     @Test
     public void do_not_explain_integer_negation() {
         expectm("- 5 == 4\n" +

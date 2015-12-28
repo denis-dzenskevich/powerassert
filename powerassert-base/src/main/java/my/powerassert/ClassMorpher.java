@@ -3,16 +3,12 @@ package my.powerassert;
 import com.sun.source.tree.AssertTree;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.StatementTree;
-import com.sun.source.util.JavacTask;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
-import com.sun.tools.javac.api.JavacTaskImpl;
-import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.comp.Attr;
 import com.sun.tools.javac.comp.Enter;
-import com.sun.tools.javac.comp.Env;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.*;
@@ -20,11 +16,8 @@ import my.powerassert.javac.Replacements;
 
 import javax.lang.model.element.Element;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 class ClassMorpher {
 
@@ -34,7 +27,6 @@ class ClassMorpher {
     private final CompilationUnitTree compilationUnit;
     private final CharSequence source;
     private final ExpressionMorpher expressionMorpher;
-    private final JavacTrees trees;
     private final TreePath path;
     private boolean attributed;
 
@@ -45,7 +37,6 @@ class ClassMorpher {
         this.t = treeFactory;
         this.expressionMorpher = expressionMorpher;
         this.path = path;
-        this.trees = JavacTrees.instance(processingEnvironment);
         try {
             source = ((Symbol.ClassSymbol) element).sourcefile.getCharContent(false);
         } catch (IOException e) {

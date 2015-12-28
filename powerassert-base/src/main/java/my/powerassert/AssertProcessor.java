@@ -43,6 +43,7 @@ public class AssertProcessor extends AbstractProcessor {
     private EnvironmentProvider createEnvironmentProvider() {
         String clazz;
         switch (JavaVersion.current()) {
+            case JDK6: clazz = "my.powerassert.EnvironmentProvider6"; break;
             case JDK7: clazz = "my.powerassert.EnvironmentProvider7"; break;
             case JDK8: clazz = "my.powerassert.EnvironmentProvider8"; break;
             default: throw new IllegalStateException(JavaVersion.current().name());

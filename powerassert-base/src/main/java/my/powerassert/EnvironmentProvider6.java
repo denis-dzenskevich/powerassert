@@ -3,20 +3,20 @@ package my.powerassert;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
 
-public class EnvironmentProvider8 implements EnvironmentProvider {
+public class EnvironmentProvider6 implements EnvironmentProvider {
 
     @Override
     public CompilerFacade createCompilerFacade() {
-        return new CompilerFacade8();
+        return new CompilerFacade6();
     }
 
     @Override
     public TreeFactory createTreeFactory(JavacProcessingEnvironment processingEnvironment) {
-        return new TreeFactory8(processingEnvironment);
+        return new TreeFactory(processingEnvironment);
     }
 
     @Override
     public ExpressionMorpher createExpressionMorpher(JCTree.JCCompilationUnit compilationUnit) {
-        return new ExpressionMorpher7(compilationUnit, createCompilerFacade());
+        return new ExpressionMorpher(compilationUnit, createCompilerFacade());
     }
 }

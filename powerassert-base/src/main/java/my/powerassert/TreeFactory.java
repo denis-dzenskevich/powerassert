@@ -1,24 +1,25 @@
 package my.powerassert;
 
-import com.sun.tools.javac.code.TypeTag;
+import com.sun.tools.javac.code.TypeTags;
+import com.sun.tools.javac.model.JavacElements;
+import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.*;
+import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Name;
-import com.sun.tools.javac.util.Names;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 class TreeFactory {
 
-    private final Factory factory;
-    private final Names names;
-    private int position;
+    protected final Factory factory;
+    protected final JavacElements elements;
+    protected int position;
 
-    TreeFactory(Factory factory, Names names) {
-        this.factory = factory;
-        this.names = names;
+    TreeFactory(JavacProcessingEnvironment processingEnvironment) {
+        this.factory = TreeMaker.instance(processingEnvironment.getContext());
+        this.elements = JavacElements.instance(processingEnvironment.getContext());
     }
 
     void setPosition(int position) {
@@ -26,11 +27,11 @@ class TreeFactory {
     }
 
     JCLiteral literal(String value) {
-        return augment(factory.Literal(TypeTag.CLASS, value));
+        return augment(factory.Literal(TypeTags.CLASS, value));
     }
 
     JCLiteral literal(int value) {
-        return augment(factory.Literal(TypeTag.INT, value));
+        return augment(factory.Literal(TypeTags.INT, value));
     }
 
     JCNewClass new_(String clazz, JCExpression... arguments) {
@@ -92,14 +93,15 @@ class TreeFactory {
     }
 
     private Name name(String stringName) {
-        return names.fromString(stringName);
+//        return names.fromString(stringName);
+        return elements.getName(stringName);
     }
 
     private JCExpression fullyQualifiedName(String dotSeparatedName) {
         String[] parts = dotSeparatedName.split("\\.");
-        JCExpression value = factory.Ident(names.fromString(parts[0]));
+        JCExpression value = factory.Ident(name(parts[0]));
         for (int i = 1; i < parts.length; i++) {
-            value = factory.Select(value, names.fromString(parts[i]));
+            value = factory.Select(value, name(parts[i]));
         }
         return value;
     }

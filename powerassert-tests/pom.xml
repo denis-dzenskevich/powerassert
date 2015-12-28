@@ -3,22 +3,24 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <artifactId>powerassert-parent</artifactId>
         <groupId>my</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <modelVersion>4.0.0</modelVersion>
     <artifactId>powerassert-tests</artifactId>
+    <version>1.0-SNAPSHOT</version>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
                 <configuration>
+                    <compilerArgument>-XprintProcessorInfo</compilerArgument>
                     <!--<testCompilerArgument>-proc:none</testCompilerArgument>-->
 <!--                    <compilerId>eclipse</compilerId>
                     <testCompilerArgument>-J-Dorg.eclipse.jdt.core.compiler.processAnnotations=true</testCompilerArgument>-->
@@ -30,6 +32,23 @@
                         <version>2.6</version>
                     </dependency>
                 </dependencies>-->
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>build-classpath</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -61,7 +80,6 @@
             <groupId>my</groupId>
             <artifactId>powerassert</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

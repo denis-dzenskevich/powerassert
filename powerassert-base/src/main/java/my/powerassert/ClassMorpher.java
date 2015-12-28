@@ -1,37 +1,47 @@
 package my.powerassert;
 
 import com.sun.source.tree.AssertTree;
+import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.StatementTree;
+import com.sun.source.util.JavacTask;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
+import com.sun.tools.javac.api.JavacTaskImpl;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.comp.Attr;
+import com.sun.tools.javac.comp.Enter;
+import com.sun.tools.javac.comp.Env;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
-import com.sun.tools.javac.tree.EndPosTable;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.*;
 import my.powerassert.javac.Replacements;
 
 import javax.lang.model.element.Element;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class ClassMorpher {
 
+    private final CompilerFacade compilerFacade;
     private final TreeFactory t;
     private final JavacProcessingEnvironment processingEnvironment;
+    private final CompilationUnitTree compilationUnit;
     private final CharSequence source;
-    private final EndPosTable endPositions;
     private final ExpressionMorpher expressionMorpher;
     private final JavacTrees trees;
     private final TreePath path;
     private boolean attributed;
 
-    ClassMorpher(Element element, JavacProcessingEnvironment processingEnvironment, EndPosTable endPositions, TreeFactory treeFactory, TreePath path, ExpressionMorpher expressionMorpher) {
+    ClassMorpher(Element element, CompilerFacade compilerFacade, JavacProcessingEnvironment processingEnvironment, CompilationUnitTree compilationUnit, TreeFactory treeFactory, TreePath path, ExpressionMorpher expressionMorpher) {
+        this.compilerFacade = compilerFacade;
         this.processingEnvironment = processingEnvironment;
-        this.endPositions = endPositions;
+        this.compilationUnit = compilationUnit;
         this.t = treeFactory;
         this.expressionMorpher = expressionMorpher;
         this.path = path;
@@ -86,13 +96,18 @@ class ClassMorpher {
     }
 
     private String sourceFor(JCTree tree) {
-        return source.subSequence(tree.getStartPosition(), tree.getEndPosition(endPositions)).toString();
+        return source.subSequence(tree.getStartPosition(), compilerFacade.getEndPosition(compilationUnit, tree)).toString();
     }
 
     private void attributeIfNeeded() {
         if (!attributed) {
-            Attr.instance(processingEnvironment.getContext()).attribExpr((JCTree) path.getLeaf(), trees.getScope(path).getEnv()); // attribute AST tree with symbolic information
-            attributed = true;
+            try {
+                Enter enter = Enter.instance(processingEnvironment.getContext());
+                Attr.instance(processingEnvironment.getContext()).attribExpr((JCTree) path.getLeaf(), enter.getTopLevelEnv((JCCompilationUnit) compilationUnit), Type.noType);
+                attributed = true;
+            } catch (Exception e) {
+                throw new RuntimeException("Cannot attribute: " + e.getMessage(), e);
+            }
         }
     }
 }

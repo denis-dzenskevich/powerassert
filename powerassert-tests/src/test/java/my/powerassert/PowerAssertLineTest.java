@@ -2,7 +2,8 @@ package my.powerassert;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class PowerAssertLineTest {
 
@@ -12,10 +13,9 @@ public class PowerAssertLineTest {
             assert false;
         } catch (AssertionError e) {
             StackTraceElement ste = e.getStackTrace()[0];
-            // TODO JDK6: weird compilation error: cannot access java.nio.file.Path; class file for java.nio.file.Path not found
-            assertThat(ste.getClassName()).isEqualTo("my.powerassert.PowerAssertLineTest");
-            assertThat(ste.getMethodName()).isEqualTo("stack_trace_must_point_to_assert_line");
-            assertThat(ste.getLineNumber()).isEqualTo(12);
+            assertEquals("my.powerassert.PowerAssertLineTest", ste.getClassName());
+            assertEquals("stack_trace_must_point_to_assert_line", ste.getMethodName());
+            assertEquals(13, ste.getLineNumber());
             return;
         }
         fail("not thrown");

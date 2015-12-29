@@ -20,10 +20,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <compilerArgument>-XprintProcessorInfo</compilerArgument>
-                    <!--<testCompilerArgument>-proc:none</testCompilerArgument>-->
 <!--                    <compilerId>eclipse</compilerId>
-                    <testCompilerArgument>-J-Dorg.eclipse.jdt.core.compiler.processAnnotations=true</testCompilerArgument>-->
+                    <testCompilerArgument>-J-Dorg.eclipse.jdt.core.compiler.processAnnotations=enabled</testCompilerArgument>-->
                 </configuration>
 <!--                <dependencies>
                     <dependency>

@@ -1,51 +1,61 @@
-package my.powerassert;
+package my.powerassert.ecj;
 
-import com.sun.source.tree.AssertTree;
-import com.sun.source.tree.CompilationUnitTree;
-import com.sun.source.tree.StatementTree;
-import com.sun.source.util.TreePath;
-import com.sun.source.util.TreePathScanner;
-import com.sun.tools.javac.code.Symbol;
-import com.sun.tools.javac.code.Type;
-import com.sun.tools.javac.comp.Attr;
-import com.sun.tools.javac.comp.Enter;
-import com.sun.tools.javac.processing.JavacProcessingEnvironment;
-import com.sun.tools.javac.tree.JCTree;
-import com.sun.tools.javac.tree.JCTree.*;
+import my.powerassert.CompilerFacade;
+import my.powerassert.ExpressionMorpher;
+import my.powerassert.TreeFactory;
 import my.powerassert.javac.Replacements;
 
-import javax.lang.model.element.Element;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.*;
+import javax.lang.model.util.AbstractElementVisitor6;
+import javax.lang.model.util.ElementScanner6;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClassMorpher {
+public class ClassMorpherECJ {
 
+    private final TypeElement element;
     private final CompilerFacade compilerFacade;
     private final TreeFactory t;
-    private final JavacProcessingEnvironment processingEnvironment;
-    private final CompilationUnitTree compilationUnit;
-    private final CharSequence source;
-    private final ExpressionMorpher expressionMorpher;
-    private final TreePath path;
+    private final ProcessingEnvironment processingEnvironment;
+//    private final CharSequence source;
+    private final ExpressionMorpherECJ expressionMorpher;
     private boolean attributed;
 
-    public ClassMorpher(Element element, CompilerFacade compilerFacade, JavacProcessingEnvironment processingEnvironment, CompilationUnitTree compilationUnit, TreeFactory treeFactory, TreePath path, ExpressionMorpher expressionMorpher) {
+    public ClassMorpherECJ(TypeElement element, CompilerFacade compilerFacade, ProcessingEnvironment processingEnvironment, TreeFactory treeFactory, ExpressionMorpherECJ expressionMorpher) {
+        this.element = element;
         this.compilerFacade = compilerFacade;
         this.processingEnvironment = processingEnvironment;
-        this.compilationUnit = compilationUnit;
         this.t = treeFactory;
         this.expressionMorpher = expressionMorpher;
-        this.path = path;
-        try {
-            source = ((Symbol.ClassSymbol) element).sourcefile.getCharContent(false);
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot get char content of " + element, e);
-        }
     }
 
     public void run(final Replacements replacements) {
-        new TreePathScanner<Object, Object>() {
+        element.accept(new ElementScanner6<Object, Object>() {
+            @Override
+            public Object visitPackage(PackageElement e, Object o) {
+                return super.visitPackage(e, o);
+            }
+            @Override
+            public Object visitType(TypeElement e, Object o) {
+                return super.visitType(e, o);
+            }
+            @Override
+            public Object visitVariable(VariableElement e, Object o) {
+                return super.visitVariable(e, o);
+            }
+            @Override
+            public Object visitExecutable(ExecutableElement e, Object o) {
+                System.out.println(e);
+                return super.visitExecutable(e, o);
+            }
+            @Override
+            public Object visitTypeParameter(TypeParameterElement e, Object o) {
+                return super.visitTypeParameter(e, o);
+            }
+        }, null);
+/*        new TreePathScanner<Object, Object>() {
             @Override
             public Object visitAssert(AssertTree assertTree, Object o) {
                 JCAssert jcAssert = (JCAssert) assertTree;
@@ -82,22 +92,22 @@ public class ClassMorpher {
                 replacements.add(getCurrentPath().getParentPath().getLeaf(), jcAssert, substitution);
                 return null;
             }
-        }.scan(path, null);
+        }.scan(path, null);*/
     }
 
-    private String sourceFor(JCTree tree) {
-        return source.subSequence(tree.getStartPosition(), compilerFacade.getEndPosition(compilationUnit, tree)).toString();
-    }
+//    private String sourceFor(JCTree tree) {
+//        return source.subSequence(tree.getStartPosition(), compilerFacade.getEndPosition(compilationUnit, tree)).toString();
+//    }
 
-    private void attributeIfNeeded() {
-        if (!attributed) {
-            try {
-                Enter enter = Enter.instance(processingEnvironment.getContext());
-                Attr.instance(processingEnvironment.getContext()).attribExpr((JCTree) path.getLeaf(), enter.getTopLevelEnv((JCCompilationUnit) compilationUnit), Type.noType);
-                attributed = true;
-            } catch (Exception e) {
-                throw new RuntimeException("Cannot attribute: " + e.getMessage(), e);
-            }
-        }
-    }
+//    private void attributeIfNeeded() {
+//        if (!attributed) {
+//            try {
+//                Enter enter = Enter.instance(processingEnvironment.getContext());
+//                Attr.instance(processingEnvironment.getContext()).attribExpr((JCTree) path.getLeaf(), enter.getTopLevelEnv((JCCompilationUnit) compilationUnit), Type.noType);
+//                attributed = true;
+//            } catch (Exception e) {
+//                throw new RuntimeException("Cannot attribute: " + e.getMessage(), e);
+//            }
+//        }
+//    }
 }

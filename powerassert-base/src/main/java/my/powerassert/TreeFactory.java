@@ -11,7 +11,7 @@ import com.sun.tools.javac.util.Name;
 
 import java.util.Arrays;
 
-class TreeFactory {
+public class TreeFactory {
 
     protected final Factory factory;
     protected final JavacElements elements;

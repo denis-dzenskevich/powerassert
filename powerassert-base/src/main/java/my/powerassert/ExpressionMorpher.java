@@ -10,7 +10,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class ExpressionMorpher extends TreePathScanner<Object, Integer> {
+public class ExpressionMorpher extends TreePathScanner<Object, Integer> {
 
     protected final JCCompilationUnit compilationUnit;
     protected final CompilerFacade compilerFacade;

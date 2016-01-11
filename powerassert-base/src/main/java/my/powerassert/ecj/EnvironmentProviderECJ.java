@@ -1,30 +1,29 @@
-package my.powerassert;
+package my.powerassert.ecj;
 
-import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
-import my.powerassert.javac.JavacProcessorImpl;
+import my.powerassert.*;
 
 import javax.annotation.processing.ProcessingEnvironment;
 
-public class EnvironmentProvider6 implements EnvironmentProvider {
+public class EnvironmentProviderECJ implements EnvironmentProvider {
 
     @Override
     public ProcessorIntf createProcessorIntf() {
-        return new JavacProcessorImpl();
+        return new EcjProcessorImpl();
     }
 
     @Override
     public CompilerFacade createCompilerFacade() {
-        return new CompilerFacade6();
+        return null;
     }
 
     @Override
     public TreeFactory createTreeFactory(ProcessingEnvironment processingEnvironment) {
-        return new TreeFactory((JavacProcessingEnvironment) processingEnvironment);
+        return null;
     }
 
     @Override
     public ExpressionMorpher createExpressionMorpher(JCTree.JCCompilationUnit compilationUnit) {
-        return new ExpressionMorpher(compilationUnit, createCompilerFacade());
+        return null;
     }
 }

@@ -2,8 +2,16 @@ package my.powerassert;
 
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
+import my.powerassert.javac.JavacProcessorImpl;
+
+import javax.annotation.processing.ProcessingEnvironment;
 
 public class EnvironmentProvider8 implements EnvironmentProvider {
+
+    @Override
+    public ProcessorIntf createProcessorIntf() {
+        return new JavacProcessorImpl();
+    }
 
     @Override
     public CompilerFacade createCompilerFacade() {
@@ -11,8 +19,8 @@ public class EnvironmentProvider8 implements EnvironmentProvider {
     }
 
     @Override
-    public TreeFactory createTreeFactory(JavacProcessingEnvironment processingEnvironment) {
-        return new TreeFactory8(processingEnvironment);
+    public TreeFactory createTreeFactory(ProcessingEnvironment processingEnvironment) {
+        return new TreeFactory8((JavacProcessingEnvironment) processingEnvironment);
     }
 
     @Override

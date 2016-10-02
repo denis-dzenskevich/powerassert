@@ -59,7 +59,7 @@ public class ClassMorpher {
                         , t.literal(sourceFor(jcAssert.getCondition())));
                 JCVariableDecl declaration = t.var("_powerassert", "my.powerassert.PowerAssert", instantiation);
                 statements.add(declaration);
-                for (ExpressionMorpher.ExpressionPart part : expressionMorpher.splitExpression(jcAssert.getCondition())) {
+                for (ExpressionPart<JCExpression> part : expressionMorpher.splitExpression(jcAssert.getCondition())) {
                     // generated: try {
                     //                _powerassert.part(<level>, <position>, <expression>);
                     //            } catch (java.lang.Throwable _powerassert_catch) {

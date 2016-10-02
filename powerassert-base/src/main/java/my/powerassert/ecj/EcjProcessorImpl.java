@@ -33,6 +33,7 @@ public class EcjProcessorImpl implements ProcessorIntf {
             for (CompilationUnitDeclaration compilationUnit : processingEnvironment.getCompiler().unitsToProcess) {
                 Parser parser = ((BaseProcessingEnvImpl) processingEnv).getCompiler().parser;
                 parser.getMethodBodies(compilationUnit);
+                TreeFactoryECJ factory = new TreeFactoryECJ();
                 for (TypeDeclaration type : compilationUnit.types) { // TODO compilationUnit.localTypes ?
                     for (AbstractMethodDeclaration method : type.methods) {
                         if (method.statements != null) {
@@ -40,17 +41,11 @@ public class EcjProcessorImpl implements ProcessorIntf {
                                 Statement statement = method.statements[i];
                                 if (statement instanceof AssertStatement) {
                                     AssertStatement assertStatement = (AssertStatement) statement;
-                                    LocalDeclaration varDeclaration = new LocalDeclaration("_powerassert".toCharArray(), -1, -1);
-                                    varDeclaration.type = new QualifiedTypeReference(charArrays("my", "powerassert", "PowerAssert"), new long[] {-1, -1, -1});
-                                    AllocationExpression initialization = new AllocationExpression();
-                                    initialization.type = new QualifiedTypeReference(charArrays("my", "powerassert", "PowerAssert"), new long[] {-1, -1, -1});
+                                    Expression message = assertStatement.exceptionArgument != null ? assertStatement.exceptionArgument : factory.null_();
                                     char[] contents = ((SourceTypeBinding) ((TypeElementImpl) element)._binding).scope.referenceContext.compilationResult().getCompilationUnit().getContents();
                                     String source = new String(contents, assertStatement.assertExpression.sourceStart(), assertStatement.assertExpression.sourceEnd() - assertStatement.assertExpression.sourceStart() + 1);
-                                    initialization.arguments = new Expression[] {
-                                            assertStatement.exceptionArgument != null ? assertStatement.exceptionArgument : new NullLiteral(-1, -1),
-                                            new StringLiteral(source.toCharArray(), -1, -1, -1)
-                                    };
-                                    varDeclaration.initialization = initialization;
+                                    LocalDeclaration varDeclaration = factory.var("_powerassert", "my.powerassert.PowerAssert"
+                                            , factory.new_("my.powerassert.PowerAssert", message, factory.literal(source)));
                                     AllocationExpression exceptionInitialization = new AllocationExpression();
                                     exceptionInitialization.type = new QualifiedTypeReference(charArrays("java", "lang", "AssertionError"), new long[] {-1, -1, -1});
                                     MessageSend exceptionArgument = new MessageSend();
@@ -67,7 +62,13 @@ public class EcjProcessorImpl implements ProcessorIntf {
                                     };
                                     IfStatement ifStatement = new IfStatement(((AssertStatement) statement).assertExpression, null, block, -1, -1);
                                     method.statements[i] = ifStatement;
-//                                    List<ExpressionMorpherECJ.ExpressionPart> parts = expressionMorpher.splitExpression(((AssertStatement) statement).assertExpression);
+                                    List<ExpressionPart<ASTNode>> parts = expressionMorpher.splitExpression(assertStatement.assertExpression);
+                                    for (ExpressionPart<ASTNode> part : parts) {
+                                        TryStatement tryStatement = new TryStatement();
+                                        tryStatement.tryBlock = new Block(0);
+//                                        tryStatement
+                                        System.out.println(part.expression);
+                                    }
                                 }
                             }
                         }

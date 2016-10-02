@@ -39,7 +39,7 @@
             <artifactId>tools</artifactId>
             <version>1.7</version>
             <scope>system</scope>
-            <systemPath>C:/Soft/jdk7/lib/tools.jar</systemPath>
+            <systemPath>S:/Soft/jdk7/lib/tools.jar</systemPath>
         </dependency>
     </dependencies>
 

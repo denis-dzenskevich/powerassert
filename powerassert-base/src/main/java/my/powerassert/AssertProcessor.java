@@ -5,6 +5,8 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import java.util.Set;
 
+// TODO detect expressions in test methods without assert statement??
+
 //@SupportedAnnotationTypes("my.powerassert.Assert")
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)

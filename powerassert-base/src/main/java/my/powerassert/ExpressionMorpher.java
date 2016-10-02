@@ -15,15 +15,15 @@ public class ExpressionMorpher extends TreePathScanner<Object, Integer> {
     protected final JCCompilationUnit compilationUnit;
     protected final CompilerFacade compilerFacade;
 
-    private List<ExpressionPart> parts = new ArrayList<ExpressionPart>();
+    private List<ExpressionPart<JCExpression>> parts;
 
     ExpressionMorpher(JCCompilationUnit compilationUnit, CompilerFacade compilerFacade) {
         this.compilationUnit = compilationUnit;
         this.compilerFacade = compilerFacade;
     }
 
-    List<ExpressionPart> splitExpression(Tree expression) {
-        parts = new ArrayList<ExpressionPart>();
+    List<ExpressionPart<JCExpression>> splitExpression(Tree expression) {
+        parts = new ArrayList<ExpressionPart<JCExpression>>();
         scan(TreePath.getPath(compilationUnit, expression), 0);
         return parts;
     }
@@ -113,16 +113,4 @@ public class ExpressionMorpher extends TreePathScanner<Object, Integer> {
         return result;
     }
 
-    static class ExpressionPart {
-
-        final JCExpression expression;
-        final int level;
-        final int position;
-
-        ExpressionPart(JCExpression expression, int level, int position) {
-            this.expression = expression;
-            this.level = level;
-            this.position = position;
-        }
-    }
 }
